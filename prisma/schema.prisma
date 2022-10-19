@@ -15,5 +15,5 @@ model Task {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   title     String
-  isDone    Boolean
+  isDone    Boolean  @default(false)
 }
