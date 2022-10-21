@@ -1,22 +1,38 @@
 import { db } from "../utils/db.server";
+import { List } from '../list/list.service';
 
-type Task = {
+export type TaskRead = {
     id: number;
     title: string;
-    isDone: boolean
+    isDone: boolean;
+    list: List;
+    //listId: number;
 }
 
-export const listTasks = async (): Promise<Task[]> => {
+type TaskWrite = {
+    title: string;
+    isDone: boolean;
+    listId: number;
+}
+
+export const listTasks = async (): Promise<TaskRead[]> => {
     return db.task.findMany({
         select: {
             id: true,
             title: true,
-            isDone: true
-        }
+            isDone: true,
+            list: {
+                select: {
+                    id: true,
+                    title: true
+                },
+            },
+            //listId: true
+        },
     });
-}
+};
 
-export const getTask = async (id: number): Promise<Task | null> => {
+export const getTask = async (id: number): Promise<TaskRead | null> => {
     return db.task.findUnique({
         where: {
             id,
@@ -24,44 +40,64 @@ export const getTask = async (id: number): Promise<Task | null> => {
         select: {
             id: true,
             title: true,
-            isDone: true
-        }
-    })
-}
+            isDone: true,
+            list: {
+                select: {
+                    id: true,
+                    title: true
+                },
+            },
+        },
+    });
+};
 
-export const createTask = async (task: Omit<Task, "id">): Promise<Task> => {
-    const { title, isDone } = task;
+export const createTask = async (task: TaskWrite): Promise<TaskRead> => {
+    const { title, isDone, listId } = task;
     return db.task.create({
         data: {
             title,
-            isDone
+            isDone,
+            listId,
         },
         select: {
             id: true,
             title: true,
-            isDone: true
-        }
+            isDone: true,
+            list: {
+                select: {
+                    id: true,
+                    title: true
+                },
+            },
+        },
     })
 }
 
-export const updateTask = async (task: Omit<Task, "id">, id: number): Promise<Task> => {
-    const { title, isDone } = task;
+
+export const updateTask = async (task: TaskWrite, id: number): Promise<TaskRead> => {
+    const { title, isDone, listId } = task;
     return db.task.update({
         where: {
             id
         },
         data: {
             title,
-            isDone
+            isDone,
+            listId
         },
         select: {
             id: true,
             title: true,
-            isDone: true
-        }
+            isDone: true,
+            list: {
+                select: {
+                    id: true,
+                    title: true
+                },
+            },
+        },
     })
 }
-
 export const deleteTask = async (id: number): Promise<void> => {
     await db.task.delete({
         where: {
