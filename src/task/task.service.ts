@@ -1,18 +1,18 @@
 import { db } from "../utils/db.server";
 import { List } from '../list/list.service';
+import { StatusRead } from '../status/status.service';
 
 export type TaskRead = {
     id: number;
     title: string;
-    isDone: boolean;
     list: List;
-    //listId: number;
+    status: StatusRead;
 }
 
 type TaskWrite = {
     title: string;
-    isDone: boolean;
     listId: number;
+    statusId: number;
 }
 
 export const listTasks = async (): Promise<TaskRead[]> => {
@@ -20,14 +20,19 @@ export const listTasks = async (): Promise<TaskRead[]> => {
         select: {
             id: true,
             title: true,
-            isDone: true,
             list: {
                 select: {
                     id: true,
                     title: true
                 },
             },
-            //listId: true
+            status: {
+                select: {
+                    id: true,
+                    title: true,
+                    list: true
+                }
+            }
         },
     });
 };
@@ -40,64 +45,82 @@ export const getTask = async (id: number): Promise<TaskRead | null> => {
         select: {
             id: true,
             title: true,
-            isDone: true,
             list: {
                 select: {
                     id: true,
                     title: true
                 },
             },
+            status: {
+                select: {
+                    id: true,
+                    title: true,
+                    list: true
+                }
+            }
         },
     });
 };
 
 export const createTask = async (task: TaskWrite): Promise<TaskRead> => {
-    const { title, isDone, listId } = task;
+    const { title, listId, statusId } = task;
     return db.task.create({
         data: {
             title,
-            isDone,
             listId,
+            statusId,
         },
         select: {
             id: true,
             title: true,
-            isDone: true,
             list: {
                 select: {
                     id: true,
                     title: true
                 },
             },
+            status: {
+                select: {
+                    id: true,
+                    title: true,
+                    list: true
+                }
+            }
         },
     })
 }
 
-
 export const updateTask = async (task: TaskWrite, id: number): Promise<TaskRead> => {
-    const { title, isDone, listId } = task;
+    const { title, listId, statusId } = task;
     return db.task.update({
         where: {
             id
         },
         data: {
             title,
-            isDone,
-            listId
+            listId,
+            statusId
         },
         select: {
             id: true,
             title: true,
-            isDone: true,
             list: {
                 select: {
                     id: true,
                     title: true
                 },
             },
+            status: {
+                select: {
+                    id: true,
+                    title: true,
+                    list: true
+                }
+            }
         },
     })
 }
+
 export const deleteTask = async (id: number): Promise<void> => {
     await db.task.delete({
         where: {

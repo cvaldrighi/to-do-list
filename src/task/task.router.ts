@@ -32,8 +32,8 @@ taskRouter.get("/:id", async (request: Request, response: Response) => {
 });
 
 //POST: create task
-//Params: title, isDone, listId
-taskRouter.post("/", body("title").isString(), body("isDone").isBoolean(), body("listId").isInt(), async (request: Request, response: Response) => {
+//Params: title, listId
+taskRouter.post("/", body("title").isString(), body("listId").isInt(), body("statusId").isInt(), async (request: Request, response: Response) => {
     const errors = validationResult(request);
     if (!errors.isEmpty()) {
         return response.status(400).json({ errors: errors.array() });
@@ -48,8 +48,7 @@ taskRouter.post("/", body("title").isString(), body("isDone").isBoolean(), body(
 });
 
 //PUT: update task
-//Params: isDone
-taskRouter.put("/:id", body("isDone").isBoolean(), async (request: Request, response: Response) => {
+taskRouter.put("/:id", body("title").isString(), async (request: Request, response: Response) => {
     const errors = validationResult(request);
     if (!errors.isEmpty()) {
         return response.status(400).json({ errors: errors.array() });
