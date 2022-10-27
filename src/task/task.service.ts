@@ -121,6 +121,35 @@ export const updateTask = async (task: TaskWrite, id: number): Promise<TaskRead>
     })
 }
 
+export const updateTaskStatus = async (task: TaskWrite, id: number): Promise<TaskRead> => {
+    const { statusId } = task;
+    return db.task.update({
+        where: {
+            id
+        },
+        data: {
+            statusId
+        },
+        select: {
+            id: true,
+            title: true,
+            list: {
+                select: {
+                    id: true,
+                    title: true
+                },
+            },
+            status: {
+                select: {
+                    id: true,
+                    title: true,
+                    list: true
+                }
+            }
+        },
+    })
+}
+
 export const deleteTask = async (id: number): Promise<void> => {
     await db.task.delete({
         where: {

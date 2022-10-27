@@ -47,8 +47,8 @@ taskRouter.post("/", body("title").isString(), body("listId").isInt(), body("sta
     }
 });
 
-//PUT: update task
-taskRouter.put("/:id", body("title").isString(), async (request: Request, response: Response) => {
+//PUT: update task 
+taskRouter.put("/:id", body("statusId").isInt(), body("title").isString, async (request: Request, response: Response) => {
     const errors = validationResult(request);
     if (!errors.isEmpty()) {
         return response.status(400).json({ errors: errors.array() });
@@ -57,6 +57,22 @@ taskRouter.put("/:id", body("title").isString(), async (request: Request, respon
     try {
         const task = request.body;
         const updateTask = await TaskService.updateTask(task, id);
+        return response.status(200).json(updateTask);
+    } catch (error: any) {
+        return response.status(500).json(error.message);
+    }
+});
+
+//PUT: update task status
+taskRouter.put("/:id", body("statusId").isInt(), async (request: Request, response: Response) => {
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+        return response.status(400).json({ errors: errors.array() });
+    }
+    const id: number = parseInt(request.params.id, 10);
+    try {
+        const task = request.body;
+        const updateTask = await TaskService.updateTaskStatus(task, id);
         return response.status(200).json(updateTask);
     } catch (error: any) {
         return response.status(500).json(error.message);
