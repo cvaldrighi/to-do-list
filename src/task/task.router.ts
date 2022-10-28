@@ -64,7 +64,7 @@ taskRouter.put("/:id", body("statusId").isInt(), body("title").isString, async (
 });
 
 //PUT: update task status
-taskRouter.put("/:id", body("statusId").isInt(), async (request: Request, response: Response) => {
+taskRouter.put("/status/:id", body("statusId").isInt(), async (request: Request, response: Response) => {
     const errors = validationResult(request);
     if (!errors.isEmpty()) {
         return response.status(400).json({ errors: errors.array() });
