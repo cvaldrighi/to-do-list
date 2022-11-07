@@ -15,7 +15,7 @@ model Task {
   title     String
   list      List     @relation(fields: [listId], references: [id], onDelete: Cascade)
   listId    Int
-  status    Status   @relation(fields: [statusId], references: [id])
+  status    Status   @relation(fields: [statusId], references: [id], onDelete: Cascade)
   statusId  Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -33,7 +33,7 @@ model List {
 model Status {
   id        Int      @id @default(autoincrement())
   title     String
-  list      List     @relation(fields: [listId], references: [id])
+  list      List     @relation(fields: [listId], references: [id], onDelete: Cascade)
   listId    Int
   Task      Task[]
   createdAt DateTime @default(now())
