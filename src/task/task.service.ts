@@ -1,19 +1,25 @@
 import { db } from "../utils/db.server";
 import { List } from '../list/list.service';
 import { StatusRead } from '../status/status.service';
+import { getTag, TagRead } from '../tag/tag.service';
+import { TaskTags } from "@prisma/client";
 
 export type TaskRead = {
     id: number;
     title: string;
     list: List;
     status: StatusRead;
+    // tag: TagRead;
 }
 
 type TaskWrite = {
     title: string;
     listId: number;
     statusId: number;
+    // tag: TagRead;
+    tagId: number;
 }
+
 
 export const listTasks = async (): Promise<TaskRead[]> => {
     return db.task.findMany({
@@ -32,7 +38,8 @@ export const listTasks = async (): Promise<TaskRead[]> => {
                     title: true,
                     list: true
                 }
-            }
+            },
+            tags: true
         },
     });
 };
@@ -57,18 +64,29 @@ export const getTask = async (id: number): Promise<TaskRead | null> => {
                     title: true,
                     list: true
                 }
-            }
+            },
+            tags: true
         },
     });
 };
 
 export const createTask = async (task: TaskWrite): Promise<TaskRead> => {
-    const { title, listId, statusId } = task;
+    const { title, listId, statusId, tagId } = task;
+    let id = tagId;
     return db.task.create({
         data: {
             title,
             listId,
             statusId,
+            tags: {
+                create: {
+                    tag: {
+                        connect: {
+                            id
+                        }
+                    }
+                }
+            }
         },
         select: {
             id: true,
@@ -85,7 +103,8 @@ export const createTask = async (task: TaskWrite): Promise<TaskRead> => {
                     title: true,
                     list: true
                 }
-            }
+            },
+            tags: true
         },
     })
 }
@@ -116,7 +135,8 @@ export const updateTask = async (task: TaskWrite, id: number): Promise<TaskRead>
                     title: true,
                     list: true
                 }
-            }
+            },
+            tags: true
         },
     })
 }
@@ -145,7 +165,8 @@ export const updateTaskStatus = async (task: TaskWrite, id: number): Promise<Tas
                     title: true,
                     list: true
                 }
-            }
+            },
+            tags: true
         },
     })
 }

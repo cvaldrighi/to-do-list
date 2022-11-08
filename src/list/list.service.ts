@@ -11,6 +11,7 @@ export const listLists = async (): Promise<List[]> => {
             id: true,
             title: true,
             Status: true,
+            Tag: true,
             Task: true
         }
     })
@@ -25,6 +26,7 @@ export const getList = async (id: number): Promise<List | null> => {
             id: true,
             title: true,
             Status: true,
+            Tag: true,
             Task: true
         }
     })
@@ -56,6 +58,7 @@ export const updateList = async (list: Omit<List, "id">, id: number): Promise<Li
             id: true,
             title: true,
             Status: true,
+            Tag: true,
             Task: true
         }
     })
