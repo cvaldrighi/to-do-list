@@ -9,15 +9,13 @@ export type TaskRead = {
     title: string;
     list: List;
     status: StatusRead;
-    // tag: TagRead;
 }
 
 type TaskWrite = {
     title: string;
     listId: number;
     statusId: number;
-    // tag: TagRead;
-    tagId: number;
+    tagId: number[];
 }
 
 
@@ -79,13 +77,13 @@ export const createTask = async (task: TaskWrite): Promise<TaskRead> => {
             listId,
             statusId,
             tags: {
-                create: {
+                create: id.map((id) => ({
                     tag: {
                         connect: {
                             id
                         }
                     }
-                }
+                }))
             }
         },
         select: {
