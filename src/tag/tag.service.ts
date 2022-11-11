@@ -1,13 +1,11 @@
 import { db } from "../utils/db.server";
 import { List } from '../list/list.service';
-// import { TaskRead } from '../task/task.service';
 
 export type TagRead = {
     id: number;
     title: string;
     color: string;
     list: List;
-    // tasks: TaskRead;
 }
 
 type TagWrite = {

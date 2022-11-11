@@ -28,6 +28,27 @@ export const listStatus = async (): Promise<StatusRead[]> => {
     })
 }
 
+export const getStatusByListId = async (id: number): Promise<StatusRead[] | null> => {
+    return db.status.findMany({
+        where: {
+            list: {
+                id,
+            },
+        },
+        select: {
+            id: true,
+            title: true,
+            list: {
+                select: {
+                    id: true,
+                    title: true
+                },
+            },
+            Task: true
+        },
+    })
+};
+
 export const getStatus = async (id: number): Promise<StatusRead | null> => {
     return db.status.findUnique({
         where: {

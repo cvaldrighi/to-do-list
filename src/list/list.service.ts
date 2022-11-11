@@ -12,7 +12,6 @@ export const listLists = async (): Promise<List[]> => {
             title: true,
             Status: true,
             Tag: true,
-            Task: true
         }
     })
 }

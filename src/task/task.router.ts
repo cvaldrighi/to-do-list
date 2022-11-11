@@ -31,8 +31,18 @@ taskRouter.get("/:id", async (request: Request, response: Response) => {
     }
 });
 
+//GET: task by listId
+taskRouter.get("/list/:id", async (request: Request, response: Response) => {
+    const id: number = parseInt(request.params.id, 10);
+    try {
+        const tasks = await TaskService.getTaskByListId(id);
+        return response.status(200).json(tasks);
+    } catch (error: any) {
+        return response.status(500).json(error.message);
+    }
+});
+
 //POST: create task
-//Params: title, listId
 taskRouter.post("/", body("title").isString(), body("listId").isInt(), body("statusId").isInt(), async (request: Request, response: Response) => {
     const errors = validationResult(request);
     if (!errors.isEmpty()) {

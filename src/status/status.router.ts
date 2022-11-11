@@ -15,6 +15,17 @@ statusRouter.get("/", async (request: Request, response: Response) => {
     }
 });
 
+//GET: status by listId
+statusRouter.get("/list/:id", async (request: Request, response: Response) => {
+    const id: number = parseInt(request.params.id, 10);
+    try {
+        const status = await StatusService.getStatusByListId(id);
+        return response.status(200).json(status);
+    } catch (error: any) {
+        return response.status(500).json(error.message);
+    }
+});
+
 //GET: single status
 statusRouter.get("/:id", async (request: Request, response: Response) => {
     const id: number = parseInt(request.params.id, 10);

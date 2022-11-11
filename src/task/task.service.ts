@@ -1,8 +1,6 @@
 import { db } from "../utils/db.server";
 import { List } from '../list/list.service';
 import { StatusRead } from '../status/status.service';
-import { getTag, TagRead } from '../tag/tag.service';
-import { TaskTags } from "@prisma/client";
 
 export type TaskRead = {
     id: number;
@@ -17,7 +15,6 @@ type TaskWrite = {
     statusId: number;
     tagId: number[];
 }
-
 
 export const listTasks = async (): Promise<TaskRead[]> => {
     return db.task.findMany({
@@ -66,6 +63,35 @@ export const getTask = async (id: number): Promise<TaskRead | null> => {
             tags: true
         },
     });
+};
+
+export const getTaskByListId = async (id: number): Promise<TaskRead[] | null> => {
+    return db.task.findMany({
+        where: {
+            list: {
+                id,
+            },
+        },
+        select: {
+            id: true,
+            title: true,
+            list: {
+                select: {
+                    id: true,
+                    title: true
+                },
+            },
+            status: {
+                select: {
+                    id: true,
+                    title: true,
+                    list: true
+                }
+            },
+            tags: true
+        },
+    })
+
 };
 
 export const createTask = async (task: TaskWrite): Promise<TaskRead> => {
