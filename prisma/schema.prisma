@@ -11,9 +11,10 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
-  password String
+  id            Int           @id @default(autoincrement())
+  username      String
+  password      String
+  refresh_token RefreshToken?
 }
 
 model Task {
@@ -64,4 +65,11 @@ model TaskTags {
   tagId  Int
 
   @@id([taskId, tagId])
+}
+
+model RefreshToken {
+  id        String @id @default(uuid())
+  expiresIn Int
+  user      User   @relation(fields: [userId], references: [id])
+  userId    Int    @unique
 }

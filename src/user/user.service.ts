@@ -1,6 +1,7 @@
 import { db } from "../utils/db.server";
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import { GenerateRefreshTokenProvider } from '../provider/GenerateRefreshTokenProvider';
+import { GenerateTokenProvider } from '../provider/GenerateTokenProvider';
 
 export type UserRead = {
     id: number;
@@ -12,14 +13,27 @@ export type UserWrite = {
     password: string;
 }
 
-export const register = async (user: UserWrite): Promise<UserRead> => {
-    const { username, password } = user;
+export const register = async (dto: UserWrite): Promise<UserRead> => {
+    const { username, password } = dto;
+
+    //hash password
     const hashPassword = await bcrypt.hash(password, 10);
 
+    //verify username
+    const userExists = await db.user.findUnique({
+        where: {
+            username
+        }
+    })
+    if (userExists) {
+        throw new Error("Username already exists");
+    }
+
+    //register user
     return db.user.create({
         data: {
             username,
-            password: hashPassword
+            password: hashPassword,
         },
         select: {
             id: true,
@@ -28,30 +42,42 @@ export const register = async (user: UserWrite): Promise<UserRead> => {
     })
 }
 
-export const login = async (userDto: UserWrite) => {
-    const { username, password } = userDto;
+export const login = async (dto: UserWrite) => {
+    const { username, password } = dto;
 
+    //verify username
     const user = await db.user.findUnique({
         where: {
             username
         }
     })
-
     if (!user) {
-        throw new Error('user not exists');
+        throw new Error('User not exists');
     }
 
+    //verify password
     const verifyPass = await bcrypt.compare(password, user.password);
-
     if (!verifyPass) {
-        throw new Error('wrong password');
+        throw new Error('Wrong password');
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET ?? "", { expiresIn: '1h' });
+    //create token
+    const tokenProvider = new GenerateTokenProvider();
+    const token = await tokenProvider.execute(user.id);
+
+    //create refresh token
+    await db.refreshToken.deleteMany({
+        where: {
+            userId: user.id
+        }
+    })
+    const refreshTokenProvider = new GenerateRefreshTokenProvider();
+    const RT = await refreshTokenProvider.execute(user.id);
 
     return {
         "user": username,
-        "token": token
+        "token": token,
+        "RT": RT
     }
 }
 
