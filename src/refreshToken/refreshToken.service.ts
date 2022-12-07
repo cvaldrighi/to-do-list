@@ -1,7 +1,7 @@
 import { db } from "../utils/db.server";
-import { GenerateTokenProvider } from '../provider/GenerateTokenProvider';
+import { GenerateTokenProvider } from '../providers/GenerateTokenProvider';
 import dayjs from 'dayjs';
-import { GenerateRefreshTokenProvider } from '../provider/GenerateRefreshTokenProvider';
+import { GenerateRefreshTokenProvider } from '../providers/GenerateRefreshTokenProvider';
 
 export class RefreshTokenService {
     async execute(refresh_token: string) {
@@ -16,10 +16,9 @@ export class RefreshTokenService {
             throw new Error('Refresh token invalid');
         }
 
-        //create RT
+        //create new token
         const generateTokenProvider = new GenerateTokenProvider();
-        const RT = await generateTokenProvider.execute(refreshToken.userId);
-
+        const newToken = await generateTokenProvider.execute(refreshToken.userId);
 
         //verify if refresh token is expired
         const refreshTokenExpired = dayjs().isAfter(dayjs.unix(refreshToken.expiresIn));
@@ -35,12 +34,12 @@ export class RefreshTokenService {
 
             //create new RT
             const generateRefreshTokenProvider = new GenerateRefreshTokenProvider();
-            const newRT = await generateRefreshTokenProvider.execute(refreshToken.userId);
+            const newRefreshToken = await generateRefreshTokenProvider.execute(refreshToken.userId);
 
-            return { RT, newRT };
+            return { newToken, newRefreshToken };
         }
 
-        return { RT };
+        return { newToken };
 
     }
 }

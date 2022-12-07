@@ -1,7 +1,7 @@
 import { db } from "../utils/db.server";
 import bcrypt from 'bcrypt';
-import { GenerateRefreshTokenProvider } from '../provider/GenerateRefreshTokenProvider';
-import { GenerateTokenProvider } from '../provider/GenerateTokenProvider';
+import { GenerateRefreshTokenProvider } from '../providers/GenerateRefreshTokenProvider';
+import { GenerateTokenProvider } from '../providers/GenerateTokenProvider';
 
 export type UserRead = {
     id: number;
@@ -72,12 +72,12 @@ export const login = async (dto: UserWrite) => {
         }
     })
     const refreshTokenProvider = new GenerateRefreshTokenProvider();
-    const RT = await refreshTokenProvider.execute(user.id);
+    const refreshToken = await refreshTokenProvider.execute(user.id);
 
     return {
         "user": username,
         "token": token,
-        "RT": RT
+        "RT": refreshToken
     }
 }
 
