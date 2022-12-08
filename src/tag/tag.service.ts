@@ -8,7 +8,7 @@ export type TagRead = {
     list: List;
 }
 
-type TagWrite = {
+export type TagWrite = {
     title: string;
     color: string;
     listId: number;

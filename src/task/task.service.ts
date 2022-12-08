@@ -9,7 +9,7 @@ export type TaskRead = {
     status: StatusRead;
 }
 
-type TaskWrite = {
+export type TaskWrite = {
     title: string;
     listId: number;
     statusId: number;
