@@ -1,29 +1,47 @@
 import express from "express";
 import type { Request, Response } from "express";
-import { UploadedFile } from "express-fileupload";
-import fs from 'fs';
+import { Readable } from "stream";
+import readline from "readline";
+
+import multer from "multer";
+const multerConfig = multer();
 
 export const fileUploadRouter = express.Router();
 
-//saving file 
-fileUploadRouter.post('/', (req: Request, res: Response) => {
+fileUploadRouter.post('/', multerConfig.single('file'), async (req: Request, res: Response) => {
 
-    if (!req.files) {
-        return res.status(500).send({ msg: "file is not found" })
-    }
-    // accessing the file
-    const myFile = req.files.file as UploadedFile;
+    //receiving file
+    const { file } = req;
+    const { buffer } = file;
 
-    //  mv() method places the file inside public directory
-    myFile.mv(`${__dirname}/public/${myFile.name}`, function (err) {
-        if (err) {
-            console.log(err)
-            return res.status(500).send({ msg: "Error occured" });
+    //reading file
+    const readableFile = new Readable();
+    readableFile.push(buffer);
+    readableFile.push(null);
+
+    const dataLine = readline.createInterface({
+        input: readableFile
+    })
+
+    //handle data
+    for await (let line of dataLine) {
+        let splited = line.split(",");
+        let task = splited[0].split(',');
+        let tag = splited.slice(1);
+
+        for (let i = 0; i < tag.length; i++) {
+
+            if (tag[i] == "") {
+
+                tag.splice(i, 1);
+            }
+
         }
 
-        // returing the response with file path and name
-        return res.send({ name: myFile.name, path: `/${myFile.name}` });
-    });
+        console.log("tasks:", task, "tags:", tag);
+    }
+
+    return res.send();
 
 })
 

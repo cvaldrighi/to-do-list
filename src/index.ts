@@ -12,7 +12,7 @@ import { refreshTokenRouter } from './refreshToken/refreshToken.router';
 import { fileUploadRouter } from "./fileUpload/fileUpload.router";
 import { uploadedDataRouter } from "./uploadedData/uploadedData.router";
 
-import fileUpload from "express-fileupload";
+// import fileUpload from "express-fileupload";
 import { AuthMiddleware } from './middlewares/auth';
 
 dotenv.config();
@@ -27,7 +27,7 @@ const app = express();
 app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
-app.use(fileUpload());
+// app.use(fileUpload());
 
 //AuthMiddleware
 
