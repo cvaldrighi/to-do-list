@@ -31,6 +31,22 @@ export const listTags = async (): Promise<TagRead[]> => {
     });
 };
 
+
+export const checkIfTagExists = async (title: string, listId: number): Promise<TagRead | null> => {
+    return db.tag.findFirst({
+        where: {
+            title,
+            listId
+        },
+        select: {
+            id: true,
+            title: true,
+            color: true,
+            list: true
+        }
+    })
+}
+
 export const getTag = async (id: number): Promise<TagRead | null> => {
     return db.tag.findUnique({
         where: {
@@ -105,3 +121,4 @@ export const deleteTag = async (id: number): Promise<void> => {
         },
     })
 }
+

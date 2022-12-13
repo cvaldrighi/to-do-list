@@ -4,22 +4,24 @@ import readline from "readline";
 
 import type { Request, Response } from "express";
 import { Readable } from "stream";
-import { TagWrite, getTag, listTags } from '../tag/tag.service';
-import { TaskWrite } from '../task/task.service';
-import { db } from "../utils/db.server";
-import { getStatusByListId } from '../status/status.service';
-import { KeyObject } from "crypto";
-
+import * as fileUploadService from "./fileUpload.service"
+import _ from "lodash";
 
 export const fileUploadRouter = express.Router();
+
 const multerConfig = multer();
+let tagsArr = [];
+let tasksArr = [];
+let listId: number = 0;
+let taskObj = {};
 
 fileUploadRouter.post('/', multerConfig.single('file'), async (req: Request, res: Response) => {
 
     //receiving file
-    const listId = parseInt(req.body.listId);
+    listId = parseInt(req.body.listId);
     const { file } = req;
     const { buffer } = file;
+    let data: string[];
 
     //reading file
     const readableFile = new Readable();
@@ -34,101 +36,31 @@ fileUploadRouter.post('/', multerConfig.single('file'), async (req: Request, res
     for await (let line of dataLine) {
 
         let splited = line.split(",");
-        let task = splited[0].split(',');
-        let tag = splited.slice(1);
+        data = _.compact(splited);
 
-        for (let i = 0; i < tag.length; i++) {
-
-            if (tag[i] == "") {
-
-                tag.splice(i, 1);
+        //for create tag
+        let tag = data.slice(1);
+        tag.forEach(e => {
+            if (!tagsArr.includes(e)) {
+                tagsArr.push(e);
             }
 
+        })
+
+        //for create task
+        taskObj = {
+            title: data[0],
+            tags: data.slice(1)
         }
-
-        tag.forEach(async e => {
-            const t: TagWrite = {
-                title: e,
-                listId: listId,
-                color: "#a44eeb"
-            }
-
-            const tagAlreadyExists = await db.tag.findFirst({
-                where: {
-                    title: t.title,
-                    listId: t.listId
-                }
-            })
-
-            console.log(tagAlreadyExists);
-
-            if (!tagAlreadyExists) {
-                const newTag = await db.tag.create({
-                    data: {
-                        title: t.title,
-                        color: t.color,
-                        listId: t.listId
-                    }
-                })
-                // console.log(newTag);
-            }
-        })
-
-        task.forEach(async e => {
-
-            //@@@TO DO
-            // TAGS SUBINDO DUPLICADAS
-
-            const statusByList = await getStatusByListId(listId);
-            const statusId = statusByList[0].id;
-            let tagId: number[] = [];
-
-            const existentTags = await listTags();
-
-            existentTags.forEach(eT => {
-                tag.forEach(t => {
-                    if (eT.title == t) {
-                        tagId.push(eT.id);
-                    }
-                })
-            })
-
-            const t: TaskWrite = {
-                title: e,
-                listId: listId,
-                statusId: statusId,
-                tagId: tagId
-            }
-
-            console.log(t);
-
-            let id = tagId;
-
-            const newTask = await db.task.create({
-                data: {
-                    title: t.title,
-                    listId: t.listId,
-                    statusId: t.statusId,
-                    tags: {
-                        create: id.map((id) => ({
-                            tag: {
-                                connect: {
-                                    id
-                                }
-                            }
-                        }))
-                    }
-                }
-            })
-
-        })
-
+        tasksArr.push(taskObj);
+        //@@@REMOVE FIRST INDEX FOR NO COLUMN NAME
     }
+
+    await fileUploadService.createTagFromUpload(tagsArr, listId);
+    await fileUploadService.createTaskFromUpload(tasksArr, listId);
 
     return res.send();
 
 })
-
-
 
 
