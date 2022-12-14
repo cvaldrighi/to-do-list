@@ -18,12 +18,11 @@ let taskObj = {};
 fileUploadRouter.post('/', multerConfig.single('file'), async (req: Request, res: Response) => {
 
     //receiving file
-    listId = parseInt(req.body.listId);
     const { file } = req;
     const { buffer } = file;
-    let data: string[];
 
     //reading file
+    listId = parseInt(req.body.listId);
     const readableFile = new Readable();
     readableFile.push(buffer);
     readableFile.push(null);
@@ -32,35 +31,39 @@ fileUploadRouter.post('/', multerConfig.single('file'), async (req: Request, res
         input: readableFile
     })
 
+    let fileData: string[];
+
     //handle data
     for await (let line of dataLine) {
 
         let splited = line.split(",");
-        data = _.compact(splited);
+        fileData = _.compact(splited);
 
-        //for create tag
-        let tag = data.slice(1);
-        tag.forEach(e => {
+        //for create tag      
+        let tag = fileData.slice(1);
+
+        tag.forEach(async e => {
             if (!tagsArr.includes(e)) {
                 tagsArr.push(e);
             }
-
         })
 
         //for create task
         taskObj = {
-            title: data[0],
-            tags: data.slice(1)
+            title: fileData[0],
+            tags: fileData.slice(1)
         }
         tasksArr.push(taskObj);
-        //@@@REMOVE FIRST INDEX FOR NO COLUMN NAME
     }
+
+    //removing first index (column name)
+    tagsArr = tagsArr.slice(1);
+    tasksArr = tasksArr.slice(1);
 
     await fileUploadService.createTagFromUpload(tagsArr, listId);
     await fileUploadService.createTaskFromUpload(tasksArr, listId);
 
     return res.send();
-
 })
 
 

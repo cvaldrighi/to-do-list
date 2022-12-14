@@ -1,5 +1,6 @@
 import { db } from "../utils/db.server";
 import { List } from '../list/list.service';
+import { Prisma } from "@prisma/client";
 
 export type TagRead = {
     id: number;
@@ -32,19 +33,21 @@ export const listTags = async (): Promise<TagRead[]> => {
 };
 
 
-export const checkIfTagExists = async (title: string, listId: number): Promise<TagRead | null> => {
-    return db.tag.findFirst({
+export const checkIfTagExists = async (title: string, listId: number) => {
+    const exists = db.tag.findFirst({
         where: {
             title,
             listId
         },
         select: {
-            id: true,
+            id: false,
             title: true,
-            color: true,
-            list: true
+            color: false,
+            list: false
         }
     })
+
+    return exists;
 }
 
 export const getTag = async (id: number): Promise<TagRead | null> => {
@@ -122,3 +125,6 @@ export const deleteTag = async (id: number): Promise<void> => {
     })
 }
 
+export const createManyTags = async (data: Prisma.TagCreateManyInput[]): Promise<Prisma.BatchPayload> => {
+    return await db.tag.createMany({ data, skipDuplicates: true })
+}
