@@ -9,6 +9,11 @@ export type TagRead = {
     list: List;
 }
 
+export type TagGeneric = {
+    id: number;
+    title: string;
+}
+
 export type TagWrite = {
     title: string;
     color: string;
@@ -33,21 +38,32 @@ export const listTags = async (): Promise<TagRead[]> => {
 };
 
 
-export const checkIfTagExists = async (title: string, listId: number) => {
-    const exists = db.tag.findFirst({
+export const findTagsByListId = async (listId: number): Promise<TagGeneric[]> => {
+    return db.tag.findMany({
+        where: {
+            listId,
+        },
+        select: {
+            id: true,
+            title: true,
+        },
+    });
+};
+
+
+export const findTag = async (title: string, listId: number): Promise<TagRead | null> => {
+    return db.tag.findFirst({
         where: {
             title,
             listId
         },
         select: {
-            id: false,
+            id: true,
             title: true,
-            color: false,
-            list: false
+            color: true,
+            list: true
         }
     })
-
-    return exists;
 }
 
 export const getTag = async (id: number): Promise<TagRead | null> => {
@@ -126,5 +142,5 @@ export const deleteTag = async (id: number): Promise<void> => {
 }
 
 export const createManyTags = async (data: Prisma.TagCreateManyInput[]): Promise<Prisma.BatchPayload> => {
-    return await db.tag.createMany({ data, skipDuplicates: true })
-}
+    return await db.tag.createMany({ data })
+} 

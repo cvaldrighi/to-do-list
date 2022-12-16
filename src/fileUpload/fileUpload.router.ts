@@ -6,16 +6,19 @@ import type { Request, Response } from "express";
 import { Readable } from "stream";
 import * as fileUploadService from "./fileUpload.service"
 import _ from "lodash";
+import { findTag } from '../tag/tag.service';
 
 export const fileUploadRouter = express.Router();
 
 const multerConfig = multer();
-let tagsArr = [];
-let tasksArr = [];
-let listId: number = 0;
-let taskObj = {};
 
 fileUploadRouter.post('/', multerConfig.single('file'), async (req: Request, res: Response) => {
+
+    let tagsArr = {};
+    let tasksArr = [];
+    let taskObj = {};
+    let listId: number = 0;
+    let counter = 0;
 
     //receiving file
     const { file } = req;
@@ -36,17 +39,22 @@ fileUploadRouter.post('/', multerConfig.single('file'), async (req: Request, res
     //handle data
     for await (let line of dataLine) {
 
+        //remove first line
+        if (!counter++) continue;
+
         let splited = line.split(",");
         fileData = _.compact(splited);
 
         //for create tag      
-        let tag = fileData.slice(1);
+        let tags = fileData.slice(1);
+        for (let tag of tags) {
 
-        tag.forEach(async e => {
-            if (!tagsArr.includes(e)) {
-                tagsArr.push(e);
+            const exists = await findTag(tag, listId);
+
+            if (exists === null) {
+                tagsArr[tag] = true;
             }
-        })
+        }
 
         //for create task
         taskObj = {
@@ -56,11 +64,7 @@ fileUploadRouter.post('/', multerConfig.single('file'), async (req: Request, res
         tasksArr.push(taskObj);
     }
 
-    //removing first index (column name)
-    tagsArr = tagsArr.slice(1);
-    tasksArr = tasksArr.slice(1);
-
-    await fileUploadService.createTagFromUpload(tagsArr, listId);
+    await fileUploadService.createTagFromUpload(_.keys(tagsArr), listId);
     await fileUploadService.createTaskFromUpload(tasksArr, listId);
 
     return res.send();

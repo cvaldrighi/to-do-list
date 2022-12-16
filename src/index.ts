@@ -12,7 +12,6 @@ import { refreshTokenRouter } from './refreshToken/refreshToken.router';
 import { fileUploadRouter } from "./fileUpload/fileUpload.router";
 import { uploadedDataRouter } from "./uploadedData/uploadedData.router";
 
-// import fileUpload from "express-fileupload";
 import { AuthMiddleware } from './middlewares/auth';
 
 dotenv.config();

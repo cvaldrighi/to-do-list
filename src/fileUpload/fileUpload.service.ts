@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
+import _ from "lodash";
 import { getStatusByListId } from "../status/status.service";
-import { createManyTags, listTags } from '../tag/tag.service';
+import { createManyTags, findTagsByListId } from '../tag/tag.service';
 import { createTask } from "../task/task.service";
 
 export type Arr = any[];
@@ -17,7 +18,6 @@ export const createTagFromUpload = async (tags: Arr, listId: number): Promise<Pr
         }
 
         data.push(t);
-
     })
 
     const results = await createManyTags(data);
@@ -26,7 +26,7 @@ export const createTagFromUpload = async (tags: Arr, listId: number): Promise<Pr
 
 export const createTaskFromUpload = async (tasks: Arr, listId: number) => {
 
-    let existentTags = await listTags();
+    let existentTags = _.keyBy(await findTagsByListId(listId), "title");
     let statusByList = await getStatusByListId(listId);
     let statusId = statusByList[0].id;
 
@@ -34,11 +34,7 @@ export const createTaskFromUpload = async (tasks: Arr, listId: number) => {
 
         //change tag title for id
         for (let i = 0; i < e.tags.length; i++) {
-            existentTags.forEach(eT => {
-                if (e.tags[i] == eT.title) {
-                    e.tags[i] = eT.id;
-                }
-            })
+            e.tags[i] = existentTags[e.tags[i]].id;
         }
 
         const t = {
@@ -50,7 +46,6 @@ export const createTaskFromUpload = async (tasks: Arr, listId: number) => {
 
         await createTask(t);
     })
-
 }
 
 
