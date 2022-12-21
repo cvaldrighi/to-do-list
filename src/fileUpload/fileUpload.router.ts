@@ -1,24 +1,26 @@
 import express from "express";
+import type { Request, Response } from "express";
+
 import multer from "multer";
 import readline from "readline";
-
-import type { Request, Response } from "express";
 import { Readable } from "stream";
-import * as fileUploadService from "./fileUpload.service"
 import _ from "lodash";
+
+import * as fileUploadService from "./fileUpload.service"
 import { findTag } from '../tag/tag.service';
 
 export const fileUploadRouter = express.Router();
-
 const multerConfig = multer();
 
 fileUploadRouter.post('/', multerConfig.single('file'), async (req: Request, res: Response) => {
 
-    let tagsArr = {};
-    let tasksArr = [];
+    let tagsObj = {};
     let taskObj = {};
+    let tasksArr = [];
+
+    let fileData: string[];
     let listId: number = 0;
-    let counter = 0;
+    let counter: number = 0;
 
     //receiving file
     const { file } = req;
@@ -34,14 +36,13 @@ fileUploadRouter.post('/', multerConfig.single('file'), async (req: Request, res
         input: readableFile
     })
 
-    let fileData: string[];
-
     //handle data
     for await (let line of dataLine) {
 
         //remove first line
         if (!counter++) continue;
 
+        //split data
         let splited = line.split(",");
         fileData = _.compact(splited);
 
@@ -52,7 +53,7 @@ fileUploadRouter.post('/', multerConfig.single('file'), async (req: Request, res
             const exists = await findTag(tag, listId);
 
             if (exists === null) {
-                tagsArr[tag] = true;
+                tagsObj[tag] = true;
             }
         }
 
@@ -61,10 +62,11 @@ fileUploadRouter.post('/', multerConfig.single('file'), async (req: Request, res
             title: fileData[0],
             tags: fileData.slice(1)
         }
+
         tasksArr.push(taskObj);
     }
 
-    await fileUploadService.createTagFromUpload(_.keys(tagsArr), listId);
+    await fileUploadService.createTagFromUpload(_.keys(tagsObj), listId);
     await fileUploadService.createTaskFromUpload(tasksArr, listId);
 
     return res.send();

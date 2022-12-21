@@ -9,15 +9,15 @@ export type Arr = any[];
 export const createTagFromUpload = async (tags: Arr, listId: number): Promise<Prisma.BatchPayload> => {
     let data = [];
 
-    tags.forEach(async e => {
+    tags.forEach(async el => {
 
-        const t = {
-            title: e,
+        const tag = {
+            title: el,
             listId,
             color: "#a44eeb"
         }
 
-        data.push(t);
+        data.push(tag);
     })
 
     const results = await createManyTags(data);
@@ -30,21 +30,21 @@ export const createTaskFromUpload = async (tasks: Arr, listId: number) => {
     let statusByList = await getStatusByListId(listId);
     let statusId = statusByList[0].id;
 
-    tasks.forEach(async e => {
+    tasks.forEach(async el => {
 
         //change tag title for id
-        for (let i = 0; i < e.tags.length; i++) {
-            e.tags[i] = existentTags[e.tags[i]].id;
+        for (let i = 0; i < el.tags.length; i++) {
+            el.tags[i] = existentTags[el.tags[i]].id;
         }
 
-        const t = {
-            title: e.title,
+        const task = {
+            title: el.title,
             listId: listId,
             statusId: statusId,
-            tagId: e.tags
+            tagId: el.tags
         }
 
-        await createTask(t);
+        await createTask(task);
     })
 }
 
