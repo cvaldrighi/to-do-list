@@ -7,11 +7,12 @@ export class RefreshTokenService {
     async execute(refresh_token: string) {
 
         //get refreshToken
-        const refreshToken = await db.refreshToken.findUnique({
+        const refreshToken = await db.refreshToken.findFirst({
             where: {
                 id: refresh_token
             }
         })
+
         if (!refreshToken) {
             throw new Error('Refresh token invalid');
         }

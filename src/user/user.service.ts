@@ -77,7 +77,7 @@ export const login = async (dto: UserWrite) => {
     return {
         "user": username,
         "token": token,
-        "RT": refreshToken
+        "refresh-token": refreshToken
     }
 }
 

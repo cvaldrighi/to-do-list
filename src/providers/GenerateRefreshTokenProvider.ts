@@ -11,7 +11,7 @@ export class GenerateRefreshTokenProvider {
                 userId,
                 expiresIn
             }
-        })
+        });
 
         return generateRT;
     }

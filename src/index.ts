@@ -26,11 +26,10 @@ const app = express();
 app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
-// app.use(fileUpload());
 
 //AuthMiddleware
 
-app.use("/api/tasks", taskRouter);
+app.use("/api/tasks", AuthMiddleware, taskRouter);
 app.use("/api/lists", listRouter);
 app.use("/api/status", statusRouter);
 app.use("/api/tags", tagRouter);
